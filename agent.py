@@ -18,8 +18,8 @@ class PriorityQueue:
         self._count += 1
 
     def pop(self):
-        _, _, item = heapq.heappop(self._heap)
-        return item
+        priority, _, item = heapq.heappop(self._heap)
+        return priority, item
 
     def peek(self):
         return self._heap[0][2]
@@ -209,8 +209,8 @@ A* Search
 def a_star_search(board: Board, heuristic: Callable[[Board], int]):
     
     frontier = PriorityQueue()
-    cost = {} #cost just stores g(n) 
-    reached = {} #reached stores f(n) = g(n) + h(n)
+    cost = {} #cost just stores g(n) - G-score
+    reached = {} #reached stores f(n) = g(n) + h(n) - F score
     
     came_from = {}
 
@@ -224,7 +224,12 @@ def a_star_search(board: Board, heuristic: Callable[[Board], int]):
     actions = []
     
     while(not frontier.is_empty()):
-        parent = frontier.pop() #pop queue 
+        parent_fscore, parent = frontier.pop() #pop queue 
+        
+        # skips stale heap entries
+        if parent_fscore != reached.get(str(parent), float("inf")):
+            continue
+        
         if(parent.goal_test()): #if parent is the goal state, return path
             path = []
             current_key = str(parent)
@@ -233,8 +238,8 @@ def a_star_search(board: Board, heuristic: Callable[[Board], int]):
                 path.append(action)
                 current_key = prev_key
             path.reverse()
-            print(path)
-            print("Number of nodes searched", num_nodes)  #check if this is accurate 
+            #print(path)
+            #print("Number of nodes searched", num_nodes)  #check if this is accurate 
             return path
         
         for child in parent.next_action_states():
@@ -246,7 +251,8 @@ def a_star_search(board: Board, heuristic: Callable[[Board], int]):
             path_cost = cost[str(parent)] + 1 #can only make one move per turn/cost +1 
             a = path_cost + heuristic(state) #calculating estimation a= g(n) + h(n)
             
-            if not (str(state) in reached) or a < reached[str(state)]:
+            # compare g-cost, if not seen default to infinity
+            if path_cost < cost.get(str(state), float("inf")):
                 reached[str(state)] = a
                 cost[str(state)] = path_cost
                 
