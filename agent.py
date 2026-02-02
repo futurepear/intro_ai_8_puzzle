@@ -8,6 +8,29 @@ import heapq
 Heuristics
 '''
 
+class PriorityQueue:
+    def __init__(self):
+        self._heap = []
+        self._count = 0 
+
+    def push(self, priority, item):
+        heapq.heappush(self._heap, (priority, self._count, item))
+        self._count += 1
+
+    def pop(self):
+        _, _, item = heapq.heappop(self._heap)
+        return item
+
+    def peek(self):
+        return self._heap[0][2]
+
+    def __len__(self):
+        return len(self._heap)
+
+    def is_empty(self):
+        return not self._heap
+    
+
 def BFS(board: Board) -> int:
     return 0
 
@@ -157,9 +180,7 @@ def NA_5(board: Board) -> int:
     return score
 
 '''
-Assignment description says heuristic may not be admissible. Let's try to 
-deliberately make a non admissible one and see if it reduces search time: 
-for example: reducing
+The final heuristic we decided on is this one, and it's not admissible
 '''
 
 def NA(board: Board) -> int:
@@ -180,34 +201,6 @@ def NA(board: Board) -> int:
     score = score * 2 
     return score
 
-
-
-
-
-
-
-
-class PriorityQueue:
-    def __init__(self):
-        self._heap = []
-        self._count = 0 
-
-    def push(self, priority, item):
-        heapq.heappush(self._heap, (priority, self._count, item))
-        self._count += 1
-
-    def pop(self):
-        _, _, item = heapq.heappop(self._heap)
-        return item
-
-    def peek(self):
-        return self._heap[0][2]
-
-    def __len__(self):
-        return len(self._heap)
-
-    def is_empty(self):
-        return not self._heap
 '''
 A* Search 
 '''
@@ -260,7 +253,6 @@ def a_star_search(board: Board, heuristic: Callable[[Board], int]):
                 came_from[str(state)] = (str(parent), action)
                 
                 frontier.push(a, state)
-        
-    
+            
     return -1
 
